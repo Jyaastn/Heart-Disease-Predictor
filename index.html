@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(5%, 5%) rotate(180deg); }
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08),
+                        0 0 0 1px rgba(0, 0, 0, 0.02);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1e293b;
+            font-size: 0.95em;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label::before {
+            content: '●';
+            color: #6366f1;
+            font-size: 0.8em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-group select option {
+            background: white;
+            color: #1e293b;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1),
+                        0 0 20px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-group small {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 0.85em;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 16px 45px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Outfit', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .result-container {
+            margin-top: 40px;
+            padding: 35px;
+            border-radius: 20px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            border: 2px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0.6;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-container.success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        .result-container.warning {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .result-container h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+        }
+
+        .result-container p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item h3 {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .result-item p {
+            font-size: 1.8em;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 18px;
+            margin-top: 20px;
+            border-radius: 10px;
+            color: #991b1b;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            margin-top: 15px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .info-text {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+            border-left: 4px solid #8b5cf6;
+            border: 1px solid #c4b5fd;
+        }
+
+        .info-text h3 {
+            color: #5b21b6;
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .info-text p {
+            color: #6b21a8;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❤️ Heart Disease Prediction</h1>
+            <p>AI-Powered Cardiovascular Risk Assessment</p>
+        </div>
+
+        <div class="content">
+            <div class="info-text">
+                <h3>💡 About This Tool</h3>
+                <p>This system uses machine learning to assess cardiovascular disease risk based on clinical parameters. Please enter accurate patient data for the most reliable prediction.</p>
+            </div>
+
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="age">Age (years)</label>
+                        <input type="number" id="age" name="Age" required min="1" max="120" placeholder="Enter age">
+                        <small>The patient's current age in years. Heart disease risk increases with age, particularly after 45 for men and 55 for women.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sex">Sex</label>
+                        <select id="sex" name="Sex" required>
+                            <option value="">Select...</option>
+                            <option value="1">Male</option>
+                            <option value="0">Female</option>
+                        </select>
+                        <small>Biological sex. Men generally have higher risk of heart disease at younger ages compared to women.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chestPain">Chest Pain Type</label>
+                        <select id="chestPain" name="Chest_Pain_Type" required>
+                            <option value="">Select...</option>
+                            <option value="1">Typical Angina - Classic heart-related chest pain</option>
+                            <option value="2">Atypical Angina - Unusual chest pain patterns</option>
+                            <option value="3">Non-Anginal Pain - Chest pain not related to heart</option>
+                            <option value="4">Asymptomatic - No chest pain symptoms</option>
+                        </select>
+                        <small>Type of chest discomfort experienced. Typical angina is most concerning for heart disease.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bp">Resting Blood Pressure (mm Hg)</label>
+                        <input type="number" id="bp" name="Resting_Blood_Pressure" required min="80" max="200" placeholder="e.g., 120">
+                        <small>Blood pressure measured at rest (systolic). Normal: 90-120 mm Hg. Higher values indicate hypertension, a major risk factor.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cholesterol">Cholesterol (mg/dl)</label>
+                        <input type="number" id="cholesterol" name="Cholesterol" required min="100" max="600" placeholder="e.g., 200">
+                        <small>Serum cholesterol level. Normal: less than 200 mg/dl. High cholesterol contributes to arterial plaque buildup.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fbs">Fasting Blood Sugar > 120 mg/dl</label>
+                        <select id="fbs" name="Fasting_Blood_Sugar" required>
+                            <option value="">Select...</option>
+                            <option value="1">Yes - Above 120 mg/dl (diabetic range)</option>
+                            <option value="0">No - Below 120 mg/dl (normal range)</option>
+                        </select>
+                        <small>Indicates if fasting blood sugar exceeds 120 mg/dl. High levels suggest diabetes, which increases heart disease risk.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ecg">Resting ECG</label>
+                        <select id="ecg" name="Resting_ECG" required>
+                            <option value="">Select...</option>
+                            <option value="0">Normal - No abnormalities detected</option>
+                            <option value="1">ST-T Wave Abnormality - Irregular patterns</option>
+                            <option value="2">Left Ventricular Hypertrophy - Enlarged heart chamber</option>
+                        </select>
+                        <small>Results from resting electrocardiogram. Abnormalities may indicate heart stress or damage.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxHr">Max Heart Rate Achieved</label>
+                        <input type="number" id="maxHr" name="Max_Heart_Rate" required min="60" max="220" placeholder="e.g., 150">
+                        <small>Maximum heart rate reached during exercise testing. Lower values may indicate reduced cardiac capacity. Normal: 60-100 bpm at rest.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="angina">Exercise Induced Angina</label>
+                        <select id="angina" name="Exercise_Angina" required>
+                            <option value="">Select...</option>
+                            <option value="1">Yes - Chest pain during exercise</option>
+                            <option value="0">No - No chest pain during exercise</option>
+                        </select>
+                        <small>Chest pain triggered by physical activity. This suggests insufficient blood flow to the heart during exertion.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stDepression">ST Depression</label>
+                        <input type="number" id="stDepression" name="ST_Depression" required min="0" max="10" step="0.1" placeholder="e.g., 1.5">
+                        <small>ST segment depression induced by exercise (measured in mm). Values above 1.0 may indicate ischemia (reduced blood flow to heart).</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stSlope">ST Slope</label>
+                        <select id="stSlope" name="ST_Slope" required>
+                            <option value="">Select...</option>
+                            <option value="1">Upsloping - Rising pattern (better prognosis)</option>
+                            <option value="2">Flat - Horizontal pattern (concerning)</option>
+                            <option value="3">Downsloping - Falling pattern (most concerning)</option>
+                        </select>
+                        <small>Slope of the ST segment during peak exercise. Downsloping patterns are most associated with heart disease.</small>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary" id="predictBtn">
+                        🔍 Analyze Patient
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="resetBtn">
+                        🔄 Clear All Fields
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing patient data...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="result-container" id="resultContainer">
+                <h2 id="resultTitle"></h2>
+                <p id="resultDescription"></p>
+                <div class="result-details">
+                    <div class="result-item">
+                        <h3>Confidence Level</h3>
+                        <p id="confidence">-</p>
+                    </div>
+                    <div class="result-item">
+                        <h3>Risk Level</h3>
+                        <p id="riskLevel">-</p>
+                    </div>
+                    <div class="result-item">
+                        <h3>Disease Probability</h3>
+                        <p id="diseaseProbability">-</p>
+                    </div>
+                    <div class="result-item">
+                        <h3>No Disease Probability</h3>
+                        <p id="noDiseaseProbability">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - Automatically detects local vs production environment
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000/api'
+            : `${window.location.origin}/api`;
+
+        const form = document.getElementById('predictionForm');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const predictBtn = document.getElementById('predictBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Form submission handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await makePrediction();
+        });
+
+        // Reset button handler
+        resetBtn.addEventListener('click', () => {
+            form.reset();
+            hideResults();
+        });
+
+        async function makePrediction() {
+            // Collect form data
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = parseFloat(value);
+            }
+
+            // Show loading, hide previous results
+            loading.classList.add('show');
+            hideResults();
+            predictBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    displayResults(result);
+                } else {
+                    showError(result.error || 'Prediction failed. Please try again.');
+                }
+            } catch (error) {
+                showError('Unable to connect to the server. Please ensure the backend is running on ' + API_URL);
+                console.error('Error:', error);
+            } finally {
+                loading.classList.remove('show');
+                predictBtn.disabled = false;
+            }
+        }
+
+        function displayResults(result) {
+            const { prediction, has_disease, confidence, probability_disease, probability_no_disease, risk_level } = result;
+
+            // Update result container class
+            resultContainer.className = 'result-container show ' + (has_disease ? 'warning' : 'success');
+
+            // Update result text
+            document.getElementById('resultTitle').textContent = prediction;
+            document.getElementById('resultDescription').textContent = has_disease 
+                ? 'The model has detected indicators of potential heart disease. Please consult with a healthcare professional for proper diagnosis.'
+                : 'The model indicates a low probability of heart disease based on the provided parameters.';
+
+            // Update result details
+            document.getElementById('confidence').textContent = confidence.toFixed(2) + '%';
+            document.getElementById('riskLevel').textContent = risk_level;
+            document.getElementById('diseaseProbability').textContent = probability_disease.toFixed(2) + '%';
+            document.getElementById('noDiseaseProbability').textContent = probability_no_disease.toFixed(2) + '%';
+
+            errorMessage.classList.remove('show');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            resultContainer.classList.remove('show');
+        }
+
+        function hideResults() {
+            errorMessage.classList.remove('show');
+            resultContainer.classList.remove('show');
+        }
+
+        // Check backend connection on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                if (!data.models_loaded) {
+                    showError('Warning: ML models not loaded on the server. Please ensure model files are present.');
+                }
+            } catch (error) {
+                showError('Cannot connect to backend server. Please ensure it is running on ' + API_URL);
+            }
+        });
+    </script>
+</body>
+</html>
